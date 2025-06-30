@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DocuFlow – Modern Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&family=Roboto&family=Merriweather&family=Courier+Prime&family=Open+Sans&family=Montserrat&family=Fira+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #14b8a6;
+      --primary-dark: #0f766e;
+      --bg-light: #f1f5f9;
+      --text-dark: #1e293b;
+      --gray: #64748b;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-dark);
+    }
+
+    header {
+      width: 100%;
+      background: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.5rem;
+      margin: 0;
+      color: var(--primary);
+    }
+
+    header p {
+      font-size: 14px;
+      color: var(--gray);
+      margin: 5px 0 0;
+    }
+
+    .container {
+      margin-top: 30px;
+      background: white;
+      width: 95%;
+      max-width: 850px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button, .toolbar select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+
+    .toolbar button:hover, .toolbar select:hover {
+      background: var(--primary-dark);
+    }
+
+    .toolbar select {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    #editor {
+      min-height: 350px;
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #fefefe;
+      color: var(--text-dark);
+      font-family: 'Roboto', sans-serif;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+      transition: font-family 0.3s ease;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #10b981;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .status.show {
+      opacity: 1;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: var(--gray);
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .toolbar {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .toolbar-group {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📝 DocuFlow</h1>
+  <p>Clean. Calm. Creative. Your modern offline editor.</p>
+</header>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <button onclick="execCmd('bold')"><b>B</b></button>
+      <button onclick="execCmd('italic')"><i>I</i></button>
+      <button onclick="execCmd('underline')"><u>U</u></button>
+      <button onclick="execCmd('insertUnorderedList')">• List</button>
+      <button onclick="execCmd('formatBlock', 'h2')">H2</button>
+      <button onclick="execCmd('formatBlock', 'blockquote')">Quote</button>
+    </div>
+    <div class="toolbar-group">
+      <select onchange="changeFont(this.value)">
+        <option value="Roboto">Roboto (Default)</option>
+        <option value="Merriweather">Merriweather</option>
+        <option value="Courier Prime">Courier Prime</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Fira Sans">Fira Sans</option>
+      </select>
+      <button onclick="saveDoc()">💾 Save</button>
+    </div>
+  </div>
+
+  <div id="editor" contenteditable="true">
+    Start writing your ideas in style...
+  </div>
+
+  <p class="status" id="status">Saved!</p>
+</div>
+
+<footer>
+  DocuFlow saves everything locally. Built with 💚 using HTML & CSS.
+</footer>
+
+<script>
+  function execCmd(command, value = null) {
+    document.execCommand(command, false, value);
+  }
+
+  function saveDoc() {
+    const content = document.getElementById("editor").innerHTML;
+    localStorage.setItem("myDocuFlow", content);
+    showStatus("Saved!");
+  }
+
+  function showStatus(message) {
+    const status = document.getElementById("status");
+    status.innerText = message;
+    status.classList.add("show");
+    setTimeout(() => status.classList.remove("show"), 1500);
+  }
+
+  function changeFont(fontName) {
+    document.getElementById("editor").style.fontFamily = `'${fontName}', sans-serif`;
+  }
+
+  // Auto-save every 10 seconds
+  setInterval(saveDoc, 10000);
+
+  window.onload = () => {
+    const saved = localStorage.getItem("myDocuFlow");
+    if (saved) {
+      document.getElementById("editor").innerHTML = saved;
+      showStatus("Loaded previous version ✔️");
+    }
+  };
+</script>
+
+</body>
+</html>
